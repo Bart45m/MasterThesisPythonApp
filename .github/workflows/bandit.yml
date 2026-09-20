@@ -21,7 +21,7 @@ jobs:
 
     # 2. Uruchomienie oficjalnego Bandita bezpośrednio z rejestru za pomocą pipx.
     # Flaga --dependency automatycznie wstrzykuje wymagany dodatek SARIF
-    # bez potrzeby konfigurowania środowiska Pythona w osobnym kroku.
+    # bez potrzeby konfigurowania środowiska Pythona w osobnym kroku. 
     - name: Run Bandit via Pipx with SARIF plugin
       run: |
         pipx run --spec "bandit[sarif]" bandit -r moja_aplikacja/ --format sarif --output bandit-results.sarif --exit-zero
