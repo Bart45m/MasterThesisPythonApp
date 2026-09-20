@@ -24,9 +24,9 @@ jobs:
     # bez potrzeby konfigurowania środowiska Pythona w osobnym kroku.
     - name: Run Bandit via Pipx with SARIF plugin
       run: |
-        pipx run --dependency bandit[sarif] bandit -r moja_aplikacja/ --format sarif --output bandit-results.sarif --exit-zero
+        pipx run --spec "bandit[sarif]" bandit -r moja_aplikacja/ --format sarif --output bandit-results.sarif --exit-zero
 
-    # 3. Przesłanie pliku SARIF do modułu Security GitHuba
+    # 3. Przesłanie wygenerowanego pliku SARIF do modułu Security GitHuba
     - name: Upload SARIF results to GitHub Code Scanning
       uses: github/codeql-action/upload-sarif@v3
       with:
