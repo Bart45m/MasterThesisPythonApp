@@ -1,0 +1,41 @@
+name: CodeQL Django Security Scan
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push events but only for the "test-codeql" branch
+  push:
+    branches: [ "test-codeql" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  security-events: write
+  contents: read
+
+jobs:
+  analyze:
+    name: Analyze CodeQL (Python/Django)
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Pobranie kodu aplikacji na runnera
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # 2. Inicjalizacja środowiska CodeQL dla języka Python
+    # Zachowujemy zaawansowane pakiety reguł (queries), aby skan był tak samo rygorystyczny jak w .NET
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: 'python'
+        queries: security-extended,security-and-quality
+
+    # UWAGA: Kroki instalacji SDK i kompilacji (Build) zostały usunięte.
+    # Python jako język skryptowy jest skanowany bezpośrednio jako kod źródłowy.
+
+    # 3. Wykonanie analizy CodeQL i automatyczne przesłanie raportu SARIF do GitHuba
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:python"
