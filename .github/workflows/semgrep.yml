@@ -1,0 +1,50 @@
+# Name of this GitHub Actions workflow.
+name: Semgrep CE Django scan
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push events but only for the "test-semgrep" branch
+  push:
+    branches: [ "test-semgrep" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  security-events: write
+  contents: read
+
+jobs:
+  semgrep:
+    # User definable name of this GitHub Actions job.
+    name: semgrep-oss/scan-django
+    # If you are self-hosting, change the following `runs-on` value: 
+    runs-on: ubuntu-latest
+
+    container:
+      # A Docker image with Semgrep installed. Do not change this.
+      image: semgrep/semgrep
+
+    # Skip any PR created by dependabot to avoid permission issues:
+    if: (github.actor != 'dependabot[bot]')
+
+    steps:
+      # Fetch project source with GitHub Actions Checkout.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Run the "semgrep scan" command on the command line of the docker image.
+      - name: Run Semgrep Scan
+        run: |
+          semgrep scan \
+            --config "p/default" --config "p/python" --config "p/bandit" \
+            --sarif \
+            --output semgrep-results.sarif \
+            --metrics=off
+
+      - name: Upload SARIF file to GitHub
+        uses: github/codeql-action/upload-sarif@v3
+        # Wykonaj ten krok nawet wtedy, gdy Semgrep znajdzie luki bezpieczeństwa (błędy)
+        if: always() 
+        with:
+          sarif_file: semgrep-results.sarif
