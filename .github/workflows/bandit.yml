@@ -1,0 +1,33 @@
+name: Test Bandit Scan Action (Official SAST SARIF)
+
+on:
+  push:
+    branches: [ "test-bandit" ]
+
+  workflow_dispatch:
+
+permissions:
+  security-events: write
+  contents: read
+
+jobs:
+  bandit-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Pobranie kodu
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # 2. Uruchomienie oficjalnego Bandita bezpośrednio z rejestru za pomocą pipx.
+    # Flaga --dependency automatycznie wstrzykuje wymagany dodatek SARIF
+    # bez potrzeby konfigurowania środowiska Pythona w osobnym kroku.
+    - name: Run Bandit via Pipx with SARIF plugin
+      run: |
+        pipx run --dependency bandit[sarif] bandit -r moja_aplikacja/ --format sarif --output bandit-results.sarif --exit-zero
+
+    # 3. Przesłanie pliku SARIF do modułu Security GitHuba
+    - name: Upload SARIF results to GitHub Code Scanning
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: bandit-results.sarif
